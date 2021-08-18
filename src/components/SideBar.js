@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link  } from "react-router-dom";
+import { useHistory } from 'react-router';
 import {
     Card,
     Sticky,
@@ -15,6 +16,8 @@ function FilterBarHome(props) {
     const [categoryValue, setCategoryValue] = useState("");
     const [personValue, setPersonValue] = useState("");
     const [regionValue, setRegionValue] = useState("");
+    const routerHistory = useHistory();
+
 
     const categoryOption = [
         { key: 'musician', value: 'musician', text: 'Musician' },
@@ -37,30 +40,30 @@ function FilterBarHome(props) {
         { key: 'Tom Hiddleston', value: 'Tom Hiddleston', text: 'Tom Hiddleston' },
         { key: 'Chris Pratt', value: 'Chris Pratt', text: 'Chris Pratt' },
         { key: 'Robert Downey Jr', value: 'Robert Downey Jr', text: 'Robert Downey Jr' },
-       
+
     ]
     const indonesianActorOptions = [
         { key: 'Dude Herlino', value: 'Dude Herlino', text: 'Dude Herlino' },
         { key: 'Herjunot Ali', value: 'Herjunot Ali', text: 'Herjunot Ali' },
         { key: 'Chicco Jerikho', value: 'Chicco Jerikho', text: 'Chicco Jerikho' },
-       
+
     ]
 
     const internationalMusicianOptions = [
         { key: 'Matt Bellamy', value: 'Matt Bellamy', text: 'Matt Bellamy' },
         { key: 'Chris Martin', value: 'Chris Martin', text: 'Chris Martin' },
         { key: 'Madonna', value: 'Madonna', text: 'Madonna' },
-       
+
     ]
     const indonesianMusicianOptions = [
         { key: 'Fiersa Besari', value: 'Fiersa Besari', text: 'Fiersa Besari' },
         { key: 'Glenn Fredly', value: 'Glenn Fredly', text: 'Glenn Fredly' },
         { key: 'Rizky Febian', value: 'Rizky Febian', text: 'Rizky Febian' },
-       
+
     ]
     const personChange = (_, { value }) => {
         setPersonValue(value);
-        window.location.href = `/home/${value}`
+        routerHistory.push(`/home/${value}`);
     };
 
     return (
@@ -92,7 +95,7 @@ function FilterBarHome(props) {
                         </Card.Content>
                     ) : (<></>)}
 
-                    {categoryValue !== "" && regionValue !== ""? (
+                    {categoryValue !== "" && regionValue !== "" ? (
                         categoryValue === "actor" ? (
                             <Card.Content>
                                 <h5>{categoryValue === "actor" ? "Actor's Name" : "Muscisian's Name"}</h5>
@@ -117,6 +120,8 @@ function FilterBarHome(props) {
                                     selection
                                     disabled={categoryValue === ""}
                                     onChange={personChange}
+                                    // as={Link}
+                                    // to={`/home/${personValue}`}
                                 />
                             </Card.Content>
                         )

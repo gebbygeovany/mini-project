@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Card, Table, Embed, Button } from "semantic-ui-react";
+import { Card, Table, Embed, Button, Menu } from "semantic-ui-react";
 
 
 function SearchResult(props) {
 
     const [id, setId] = useState("");
+    const [activeItem, setActiveItem] = useState("Videos");
 
     const persons = [
         {
@@ -201,52 +202,136 @@ function SearchResult(props) {
         },
     ]
 
+    const person = props.personName;
+
+    console.log(person)
+    console.log(props.personName)
+
     const resultLists = persons.filter((person) => person.name === props.personName);
 
     console.log(resultLists.length)
     console.log(props.personName)
 
+    const [search, setSeacrh] = useState("");
+    const [results, setResults] = useState([]);
+    const [searchInfo, setSearchInfo] = useState({});
+
+    const handleChange = (_, { name }) => {
+        setActiveItem(name);
+    };
+
+    const handleSearch = async e => {
+        e.preventDefault()
+        const endpoint = `https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=20&srsearch=${props.personName}`;
+        const response = await fetch(endpoint)
+        if (!response.ok) {
+            throw Error(response.statusText)
+        }
+        const json = await response.json()
+        setResults(json.query.search)
+        setSearchInfo(json.query.searchinfo)
+        setActiveItem("Articles")
+        console.log(json.query.search)
+
+    }
+
+
+
 
     return (
         <>
-            <h4>Search Result {props.personName === " " ? "" : "for " + props.personName}</h4>
-            <Card fluid style={{ boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)" }}>
-                <Table striped fluid >
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.HeaderCell>Title</Table.HeaderCell>
-                            <Table.HeaderCell></Table.HeaderCell>
-                        </Table.Row>
-                    </Table.Header>
-
-                    <Table.Body>
-                        {resultLists.length == 0 ? (
-                            <Table.Row>
-                                <Table.Cell>No Results Found</Table.Cell>
-                                <Table.Cell>
-                                </Table.Cell>
-                            </Table.Row>
-                        ) : (
-                            resultLists.map((result) => (
-                                <Table.Row>
-                                    <Table.Cell>{result.tittle}</Table.Cell>
-                                    <Table.Cell>
-                                        <Button floated="right" icon='play' content='Play Video' onClick={() => setId(result.link)} />
-                                    </Table.Cell>
-                                </Table.Row>
-                            ))
-                        )}
-
-                    </Table.Body>
-                </Table>
-            </Card>
-            <h4>Search Content</h4>
-            <Card fluid style={{ boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)" }}>
-                <Embed
-                    id={id === "" ? "5RNkQaDcRAc" : id}
-                    source='youtube'
+            <Menu fluid widths={2}>
+                <Menu.Item
+                    name='Videos'
+                    active={activeItem === 'Videos'}
+                    onClick={handleChange}
                 />
-            </Card>
+                <Menu.Item
+                    name='Articles'
+                    active={activeItem === 'Articles'}
+                    onClick={props.personName===" "?handleChange:handleSearch}
+                />
+
+            </Menu>
+            {activeItem === "Articles" ? (
+                <>
+                    <h4>Article Result Related {props.personName === " " ? "" : "to " + props.personName}</h4>
+                    <Card fluid style={{ boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)" }}>
+                        <Table striped fluid >
+                            <Table.Header>
+                                <Table.Row>
+                                    <Table.HeaderCell>Article Title</Table.HeaderCell>
+                                    <Table.HeaderCell>
+                                    <Button floated="right" icon="refresh" onClick={props.personName===" "?"":handleSearch}></Button>
+                                    </Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Header>
+
+                            <Table.Body>
+                                {results.map((result, i) => {
+                                    const url = `https://en.wikipedia.org/?curid=${result.pageid}`
+                                    return (
+                                        <Table.Row key={i}>
+                                            <Table.Cell>{result.title}</Table.Cell>
+                                            <Table.Cell>
+                                                <Button color="teal" floated="right" content='Read More' onClick={() => window.open(url, "_blank")} />
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    )
+                                })}
+
+                            </Table.Body>
+                        </Table>
+                    </Card>
+                    <br></br>
+                    <br></br>
+                    <br></br>
+                    <br></br>
+                </>
+            ) : (
+                <>
+                    <h4>Video Result {props.personName === " " ? "" : "for " + props.personName}</h4>
+                    <Card fluid style={{ boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)" }}>
+                        <Table striped fluid >
+                            <Table.Header>
+                                <Table.Row>
+                                    <Table.HeaderCell>Video Title</Table.HeaderCell>
+                                    <Table.HeaderCell></Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Header>
+
+                            <Table.Body>
+                                {resultLists.length == 0 ? (
+                                    <Table.Row>
+                                        <Table.Cell>No Results Found</Table.Cell>
+                                        <Table.Cell>
+                                        </Table.Cell>
+                                    </Table.Row>
+                                ) : (
+                                    resultLists.map((result) => (
+                                        <Table.Row>
+                                            <Table.Cell>{result.tittle}</Table.Cell>
+                                            <Table.Cell>
+                                                <Button color="teal" floated="right" icon='play' content='Play Video' onClick={() => setId(result.link)} />
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    ))
+                                )}
+
+                            </Table.Body>
+                        </Table>
+                    </Card>
+
+                    <h4>Video Player</h4>
+                    <Card fluid style={{ boxShadow: "0px 3px 5px rgba(0, 0, 0, 0.2)" }}>
+                        <Embed
+                            id={id === "" ? "5RNkQaDcRAc" : id}
+                            source='youtube'
+                        />
+                    </Card>
+                </>
+            )}
+
         </>
     );
 }
